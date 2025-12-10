@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from app.application.halo_service import get_halo_profile, get_arena_service_record, get_match_history
 from app.application.ml_service import predict_player_performance
 from app.domain.models import Match, Player, PredictionResult
+from typing import List
 
 router = APIRouter()
 
@@ -31,7 +32,7 @@ def arena_service_record(player: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/matches/{player}", tags=["Matches"], summary="Get match history")
+@router.get("/matches/{player}", tags=["Matches"], response_model=List[Match], summary="Get match history")
 def match_history(player: str, count: int = 25, offset: int = 0):
     """
     Retrieve a player's recent match history.
