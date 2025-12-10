@@ -1,0 +1,45 @@
+name: Deploy to AWS Elastic Beanstalk
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Zip application
+        run: zip -r app.zip . -x '*.git*'
+
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: backend
+          environment_name: halo-api-env-python
+          region: eu-west-1
+          version_label: ${{ github.sha }}
+          deployment_package: app.zip
+
+      - name: Set environment variable (API Key)
+        run: |
+          aws elasticbeanstalk update-environment --environment-name halo-api-env-python --option-settings Namespace=aws:elasticbeanstalk:application:environment,OptionName=HALO_API_KEY,Value=${{ secrets.HALO_API_KEY }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: eu-west-1
