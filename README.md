@@ -1,6 +1,6 @@
 # Halo 5 API Wrapper (Hexagonal Architecture)
 
-This project is a FastAPI-based wrapper for the Halo 5 API, structured using Hexagonal Architecture (Ports & Adapters).
+This project is a FastAPI-based wrapper for the Halo 5 API, structured using Hexagonal Architecture (Ports & Adapters). It also makes use of Elasticbeanstalk and Github actions to handle the CI/CD.
 
 [![Deploy to AWS Elastic Beanstalk](https://github.com/NicmeisteR/sp-halo5-fastapi-wrapper/actions/workflows/deploy.yml/badge.svg)](https://github.com/NicmeisteR/sp-halo5-fastapi-wrapper/actions/workflows/deploy.yml)
 
@@ -68,3 +68,32 @@ This separation makes your codebase more maintainable, testable, and adaptable t
 
 ## References
 - [Halo 5 API Documentation](https://developer.haloapi.com/apis)
+
+
+## AWS Elastic Beanstalk CLI (eb) Commands
+
+The AWS Elastic Beanstalk CLI (`eb`) is used to manage your application environments and deployments. Here are some common commands and what they do:
+
+| Command | Description |
+|---------|-------------|
+| `eb init` | Initialize your project directory with Elastic Beanstalk settings. Run this once per project to set up region, platform, and application. |
+| `eb create <env-name>` | Create a new environment (e.g., `eb create halo-api-env`). Deploys your app to a new environment. |
+| `eb deploy` | Deploy the latest code changes to the current environment. |
+| `eb open` | Open the deployed application in your web browser. |
+| `eb status` | Show the status of the current environment (health, URL, etc.). |
+| `eb logs` | Retrieve and display logs from the environment. Useful for debugging. |
+| `eb terminate <env-name>` | Terminate (delete) an environment and all its resources. |
+| `eb setenv VAR=VALUE` | Set environment variables for your application. |
+
+Important to note, eb deploy only deploys what you've commited. Ran into an issue where my changes didn't reflect which is how I found out.
+
+**Example workflow:**
+```sh
+eb init  # Set up project
+eb create halo-api-env  # Create environment and deploy
+eb deploy  # Deploy new changes
+eb open  # Open app in browser
+```
+
+For more, see the [AWS EB CLI documentation](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3.html).
+
