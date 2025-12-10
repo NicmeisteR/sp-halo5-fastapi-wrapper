@@ -58,7 +58,7 @@ jobs:
             BODY="One or more stages failed."
             PRIORITY="high"
           fi
-          curl -X POST https://minecraft.nicmeister.cloud/api/webhooks/event \
+          curl -X POST http://minecraft.nicmeister.cloud:3000/api/webhooks/event \
             -H "Content-Type: application/json" \
             -H "User-Agent: insomnia/2023.5.8" \
             -H "x-api-key: ek_dUrZeRZU6x8MjIneIO6k7g4WkZ2tJ4BqWjhLv5dSIs53UyaY" \
