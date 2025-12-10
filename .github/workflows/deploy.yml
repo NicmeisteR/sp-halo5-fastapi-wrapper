@@ -44,3 +44,41 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: eu-west-1
+
+      - name: Notify EchoNeko Webhook
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+          if [ "$STATUS" = "success" ]; then
+            TITLE="Deployment Succeeded"
+            BODY="All stages passed."
+            PRIORITY="normal"
+          else
+            TITLE="Deployment Failed"
+            BODY="One or more stages failed."
+            PRIORITY="high"
+          fi
+          curl -X POST https://minecraft.nicmeister.cloud/api/webhooks/event \
+            -H "Content-Type: application/json" \
+            -H "User-Agent: insomnia/2023.5.8" \
+            -H "x-api-key: ek_dUrZeRZU6x8MjIneIO6k7g4WkZ2tJ4BqWjhLv5dSIs53UyaY" \
+            -d '{
+              "user_id": "8c3ff0ae-3804-4792-a404-e9254bc2b66c",
+              "title": "'"$TITLE"'",
+              "body": "'"$BODY"'",
+              "event_type": "event",
+              "source": "EchoNeko",
+              "priority": "'"$PRIORITY"'",
+              "data": {
+                "metadata": "GitHub Actions deployment",
+                "count": 1,
+                "items_count": 3,
+                "url": "https://github.com/${{ github.repository }}",
+                "commit": "${{ github.sha }}",
+                "workflow": "${{ github.workflow }}",
+                "run_id": "${{ github.run_id }}",
+                "status": "'"$STATUS"'"
+              },
+              "send_push": true
+            }' || true
+        continue-on-error: true
