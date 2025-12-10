@@ -2,6 +2,8 @@
 
 This project is a FastAPI-based wrapper for the Halo 5 API, structured using Hexagonal Architecture (Ports & Adapters).
 
+[![Deploy to AWS Elastic Beanstalk](https://github.com/NicmeisteR/sp-halo5-fastapi-wrapper/actions/workflows/deploy.yml/badge.svg)](https://github.com/NicmeisteR/sp-halo5-fastapi-wrapper/actions/workflows/deploy.yml)
+
 ## Structure
 
 - `main.py`: FastAPI entrypoint
