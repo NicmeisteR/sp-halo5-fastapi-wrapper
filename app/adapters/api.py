@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.application.halo_service import get_halo_profile, get_arena_service_record, get_match_history
 from app.application.ml_service import predict_player_performance
-from app.domain.models import Match, Player, PredictionResult
+from app.domain.models import Match, Player, PredictionResult, PlayerMatches
 from typing import List
 
 router = APIRouter()
@@ -32,7 +32,7 @@ def arena_service_record(player: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/matches/{player}", tags=["Matches"], response_model=List[Match], summary="Get match history")
+@router.get("/matches/{player}", tags=["Matches"], response_model=PlayerMatches, summary="Get match history")
 def match_history(player: str, count: int = 25, offset: int = 0):
     """
     Retrieve a player's recent match history.
@@ -55,26 +55,20 @@ def predict_performance(player: str, count: int = 25):
     """
     try:
         raw = get_match_history(player, count)
-        matches = []
-        for m in raw.get("Results", []):
-            for player_stats in m.get("Players", []):
-                # Map numeric result codes to string labels
-                result_code = player_stats.get("Result", "")
-                result_map = {0: "dnf", 1: "loss", 2: "tie", 3: "win"}
-                if isinstance(result_code, int):
-                    result_val = result_map.get(result_code, str(result_code))
-                else:
-                    result_val = str(result_code)
-                matches.append(Match(
-                    match_id=m.get("Id", {}).get("MatchId", ""),
-                    game_mode=m.get("GameMode", ""),
-                    result=result_val,
-                    kills=player_stats.get("TotalKills", 0),
-                    deaths=player_stats.get("TotalDeaths", 0),
-                    assists=player_stats.get("TotalAssists", 0),
-                    date=m.get("MatchCompletedDate", {}).get("ISO8601Date", "")
-                ))
-        # Use the provided player argument for the gamertag
+        result_map = {0: "dnf", 1: "loss", 2: "tie", 3: "win"}
+        matches = [
+            Match(
+                match_id=m.get("Id", {}).get("MatchId", ""),
+                game_mode=m.get("GameMode", ""),
+                result=result_map.get(ps.get("Result", ""), str(ps.get("Result", ""))),
+                kills=ps.get("TotalKills", 0),
+                deaths=ps.get("TotalDeaths", 0),
+                assists=ps.get("TotalAssists", 0),
+                date=m.get("MatchCompletedDate", {}).get("ISO8601Date", "")
+            )
+            for m in raw.get("Results", [])
+            for ps in m.get("Players", [])
+        ]
         return predict_player_performance(matches, player=player)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
