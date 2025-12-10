@@ -71,8 +71,6 @@ jobs:
               "priority": "'"$PRIORITY"'",
               "data": {
                 "metadata": "GitHub Actions deployment",
-                "count": 1,
-                "items_count": 3,
                 "url": "https://github.com/${{ github.repository }}",
                 "commit": "${{ github.sha }}",
                 "workflow": "${{ github.workflow }}",
