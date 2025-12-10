@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+*.sqlite3
+*.db
+
+# VS Code
+.vscode/
+
+# Environment
+.env
+*.env
+
+# AWS Elastic Beanstalk
+.elasticbeanstalk/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# GitHub Actions
+.github/workflows/*.log
+
+# Zip and deployment artifacts
+*.zip
+app.zip
+
+# Misc
+*.bak
+*.swp
+
+# Ignore secrets
+secrets*
+
+# Ignore test output
+htmlcov/
+coverage.xml
+*.cover
+
+# Ignore Jupyter Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Ignore pip cache
+pip-wheel-metadata/
+__pypackages__/
+
+# Ignore node modules (if any)
+node_modules/
