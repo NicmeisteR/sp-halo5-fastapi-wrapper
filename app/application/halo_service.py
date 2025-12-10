@@ -1,6 +1,7 @@
 import requests
 from app.config.settings import HALO_API_KEY, HALO_API_BASE_URL
 
+# Fixme: Implement proper typing for return values
 def get_halo_profile(player: str):
     url = f"{HALO_API_BASE_URL}/stats/h5/profiles/{player}/spartan"
     headers = {"Ocp-Apim-Subscription-Key": HALO_API_KEY}
@@ -8,6 +9,7 @@ def get_halo_profile(player: str):
     response.raise_for_status()
     return response.json()
 
+# Fixme: Implement proper typing for return values
 def get_arena_service_record(player: str):
     """
     Fetches the Arena Service Record for a player from the Halo 5 API.
