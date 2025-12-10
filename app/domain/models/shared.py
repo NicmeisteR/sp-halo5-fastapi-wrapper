@@ -1,0 +1,1 @@
+# TODO: Add shared types here since we will have a lot of overlap between different endpoints
