@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.application.halo_service import get_halo_profile, get_arena_service_record, get_match_history
-from app.application.ml_service import predict_player_performance
-from app.domain.models import Match, Player, PredictionResult, PlayerMatches, ServiceRecordResponse
+from app.application.ml_service import predict_player_performance, compare_players
+from app.domain.models import Match, Player, PredictionResult, CompareResult, PlayerMatches, ServiceRecordResponse
 from typing import List
 
 router = APIRouter()
@@ -48,27 +48,67 @@ def match_history(player: str, count: int = 25, offset: int = 0):
 
 
 @router.get("/predict/{player}", tags=["Predictions"], response_model=PredictionResult, summary="Predict player performance")
-def predict_performance(player: str, count: int = 25):
+def predict_performance(player: str):
     """
-    Player is the gamertag for whom to predict performance, count is the max the API allows per request.
-    Might swap into doing 4 requests of 25 each to get 100 matches for better accuracy later.
+    Predict player performance based on their last 100 matches.
+    Makes 4 API calls of 25 matches each to get 100 matches for better accuracy.
     """
     try:
-        raw = get_match_history(player, count)
         result_map = {0: "dnf", 1: "loss", 2: "tie", 3: "win"}
-        matches = [
-            Match(
-                match_id=m.get("Id", {}).get("MatchId", ""),
-                game_mode=m.get("GameMode", ""),
-                result=result_map.get(ps.get("Result", ""), str(ps.get("Result", ""))),
-                kills=ps.get("TotalKills", 0),
-                deaths=ps.get("TotalDeaths", 0),
-                assists=ps.get("TotalAssists", 0),
-                date=m.get("MatchCompletedDate", {}).get("ISO8601Date", "")
-            )
-            for m in raw.get("Results", [])
-            for ps in m.get("Players", [])
-        ]
+        matches = []
+        
+        # Fetch 100 matches (4 requests of 25 each)
+        for offset in range(0, 100, 25):
+            raw = get_match_history(player, count=25, offset=offset)
+            for m in raw.get("Results", []):
+                for ps in m.get("Players", []):
+                    matches.append(Match(
+                        match_id=m.get("Id", {}).get("MatchId", ""),
+                        game_mode=m.get("GameMode", ""),
+                        result=result_map.get(ps.get("Result", ""), str(ps.get("Result", ""))),
+                        kills=ps.get("TotalKills", 0),
+                        deaths=ps.get("TotalDeaths", 0),
+                        assists=ps.get("TotalAssists", 0),
+                        date=m.get("MatchCompletedDate", {}).get("ISO8601Date", "")
+                    ))
+        
         return predict_player_performance(matches, player=player)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/compare/{player1}/{player2}", tags=["Predictions"], response_model=CompareResult, summary="Compare two players")
+def compare_performance(player1: str, player2: str):
+    """
+    Compare two players based on their last 100 matches each.
+    Estimates kills, deaths, and win chance for a hypothetical matchup.
+    
+    - **player1**: First player's Xbox Live gamertag
+    - **player2**: Second player's Xbox Live gamertag
+    """
+    try:
+        result_map = {0: "dnf", 1: "loss", 2: "tie", 3: "win"}
+        
+        def fetch_matches(player: str) -> list:
+            matches = []
+            for offset in range(0, 100, 25):
+                raw = get_match_history(player, count=25, offset=offset)
+                for m in raw.get("Results", []):
+                    for ps in m.get("Players", []):
+                        matches.append(Match(
+                            match_id=m.get("Id", {}).get("MatchId", ""),
+                            game_mode=m.get("GameMode", ""),
+                            result=result_map.get(ps.get("Result", ""), str(ps.get("Result", ""))),
+                            kills=ps.get("TotalKills", 0),
+                            deaths=ps.get("TotalDeaths", 0),
+                            assists=ps.get("TotalAssists", 0),
+                            date=m.get("MatchCompletedDate", {}).get("ISO8601Date", "")
+                        ))
+            return matches
+        
+        p1_matches = fetch_matches(player1)
+        p2_matches = fetch_matches(player2)
+        
+        return compare_players(p1_matches, p2_matches, player1, player2)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
