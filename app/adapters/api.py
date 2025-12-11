@@ -76,7 +76,7 @@ def predict_performance(player: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
+# Not the bet way to handle this, need to swap to a json object with post or a query param.
 @router.get("/compare/{player1}/{player2}", tags=["Predictions"], response_model=CompareResult, summary="Compare two players")
 def compare_performance(player1: str, player2: str):
     """
