@@ -6,8 +6,8 @@ app = FastAPI(
     description="A FastAPI wrapper for the Halo 5 API using Hexagonal Architecture. Provides endpoints for player profiles, arena statistics, match history, and ML-based performance predictions.",
     version="1.0.0",
     contact={
-        "name": "Schuberg Philis",
-        "url": "https://github.com/schuberg-philis",
+        "name": "Nicolaas Nel",
+        "url": "https://github.com/nicmeister",
     },
     license_info={
         "name": "MIT",
